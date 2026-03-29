@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Belleza — Салон Красоты</title>
+<link rel="stylesheet" href="css/main.css">
+<style>
+/* ── Hero ── */
+#hero {
+  min-height: 100vh; display: flex; align-items: center;
+  padding-top: 70px;
+  background: linear-gradient(145deg, var(--ivory) 0%, var(--ivory2) 60%, rgba(196,130,106,.07) 100%);
+  position: relative; overflow: hidden;
+}
+#hero::after {
+  content: '';
+  position: absolute; bottom: -1px; left: 0; right: 0;
+  height: 80px;
+  background: linear-gradient(to bottom, transparent, var(--ivory));
+}
+.hero-wrap {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: .6rem;
+  font-size: .7rem; letter-spacing: .28em; text-transform: uppercase;
+  color: var(--rose); margin-bottom: 1.4rem;
+}
+.hero-eyebrow::before { content: '✦'; }
+.hero-title { margin-bottom: 1.3rem; color: var(--plum); }
+.hero-title em { color: var(--rose); font-style: italic; display: block; }
+.hero-text p { font-size: 1.05rem; max-width: 440px; margin-bottom: 2.5rem; }
+.hero-cta { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+/* floating card */
+.hero-card {
+  background: var(--white); border-radius: var(--r-lg);
+  padding: 2rem 1.8rem;
+  box-shadow: var(--shadow-l); border: 1px solid var(--ivory2);
+  animation: float 5s ease-in-out infinite;
+}
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+.hc-head {
+  font-family: 'Playfair Display', serif; font-size: 1.05rem;
+  color: var(--plum); margin-bottom: 1.3rem;
+  display: flex; align-items: center; gap: .6rem;
+}
+.hc-head::before { content: '✦'; color: var(--rose); font-size: .8rem; }
+.hc-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .7rem 0; border-bottom: 1px solid var(--ivory2);
+}
+.hc-row:last-child { border: none; }
+.hc-name  { font-size: .88rem; color: var(--plum); }
+.hc-meta  { font-size: .75rem; color: var(--plum-lt); }
+.hc-price { font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--rose); font-weight: 500; }
+
+/* ── Stats strip ── */
+#stats {
+  background: var(--plum); padding: 3.5rem 0;
+}
+.stats-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; text-align: center;
+}
+.stat-num {
+  font-family: 'Playfair Display', serif; font-size: 2.6rem; font-weight: 700;
+  color: var(--rose); line-height: 1;
+}
+.stat-label { font-size: .8rem; color: var(--ivory2); opacity: .7; margin-top: .4rem; letter-spacing: .1em; text-transform: uppercase; }
+
+/* ── Services preview ── */
+#services-preview { background: var(--white); }
+.sp-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4rem;
+}
+.sp-card {
+  padding: 1.8rem; border-radius: var(--r);
+  background: var(--ivory); border: 1px solid var(--ivory2);
+  transition: all var(--transition); cursor: pointer; position: relative; overflow: hidden;
+}
+.sp-card::before {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--rose), var(--gold));
+  transform: scaleX(0); transform-origin: left; transition: transform .35s;
+}
+.sp-card:hover { box-shadow: var(--shadow-m); transform: translateY(-4px); }
+.sp-card:hover::before { transform: scaleX(1); }
+.sp-icon  { font-size: 1.6rem; margin-bottom: .9rem; }
+.sp-type  { font-size: .68rem; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); margin-bottom: .4rem; }
+.sp-name  { font-family: 'Playfair Display', serif; font-size: 1.15rem; margin-bottom: .5rem; }
+.sp-desc  { font-size: .83rem; color: var(--plum-lt); line-height: 1.65; margin-bottom: 1rem; }
+.sp-foot  { display: flex; justify-content: space-between; align-items: center; }
+.sp-dur   { font-size: .78rem; color: var(--plum-lt); }
+.sp-price { font-family: 'Playfair Display', serif; font-size: 1.15rem; color: var(--rose); }
+
+/* ── Masters preview ── */
+.mp-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.4rem;
+}
+.mp-card {
+  background: var(--white); border-radius: var(--r);
+  border: 1px solid var(--ivory2); padding: 1.8rem 1.4rem;
+  text-align: center; transition: all var(--transition);
+}
+.mp-card:hover { box-shadow: var(--shadow-m); transform: translateY(-4px); }
+.mp-avatar {
+  width: 72px; height: 72px; border-radius: 50%;
+  margin: 0 auto 1rem;
+  background: linear-gradient(135deg, var(--rose), var(--gold));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #fff;
+}
+.mp-name { font-family: 'Playfair Display', serif; font-size: 1rem; margin-bottom: .25rem; }
+.mp-spec { font-size: .72rem; color: var(--rose); letter-spacing: .12em; text-transform: uppercase; }
+
+/* ── CTA band ── */
+#cta-band {
+  background: linear-gradient(135deg, var(--plum) 0%, var(--plum2) 100%);
+  text-align: center; padding: 6rem 0;
+}
+#cta-band h2 { color: var(--ivory); margin-bottom: 1rem; }
+#cta-band p  { color: var(--ivory2); opacity: .7; margin-bottom: 2.5rem; }
+
+@media(max-width:900px){
+  .hero-wrap { grid-template-columns: 1fr; }
+  .hero-card { display: none; }
+  .sp-grid   { grid-template-columns: 1fr 1fr; }
+  .mp-grid   { grid-template-columns: 1fr 1fr; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+}
+@media(max-width:560px){
+  .sp-grid { grid-template-columns: 1fr; }
+  .mp-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<div id="toasts"></div>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-wrap">
+      <div class="hero-text">
+        <div class="hero-eyebrow">Салон красоты · Belleza</div>
+        <h1 class="hero-title">Красота — это<br><em>искусство</em></h1>
+        <p>Профессиональный уход, стрижки, маникюр и косметология. Доверьте свой образ нашим мастерам и ощутите разницу.</p>
+        <div class="hero-cta">
+          <a href="booking.html" class="btn btn-primary btn-lg">Записаться онлайн</a>
+          <a href="services.html" class="btn btn-outline btn-lg">Все услуги</a>
+        </div>
+      </div>
+      <div class="hero-card" id="heroCard">
+        <div class="hc-head">Популярные услуги</div>
+        <div id="heroRows"><div class="loader"><div class="spin"></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section id="stats">
+  <div class="container">
+    <div class="stats-grid">
+      <div><div class="stat-num">5+</div><div class="stat-label">Мастеров</div></div>
+      <div><div class="stat-num">8</div><div class="stat-label">Видов услуг</div></div>
+      <div><div class="stat-num">500+</div><div class="stat-label">Довольных клиентов</div></div>
+      <div><div class="stat-num">7</div><div class="stat-label">Лет на рынке</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES PREVIEW -->
+<section id="services-preview">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">Прайс-лист</div>
+      <h2 class="section-title">Популярные услуги</h2>
+      <p class="section-sub">Широкий спектр процедур для вашей красоты и здоровья</p>
+    </div>
+    <div class="sp-grid" id="spGrid">
+      <div class="loader"><div class="spin"></div></div>
+    </div>
+    <div style="text-align:center;margin-top:2.5rem">
+      <a href="services.html" class="btn btn-outline btn-lg">Смотреть весь прайс-лист →</a>
+    </div>
+  </div>
+</section>
+
+<!-- MASTERS PREVIEW -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">Команда</div>
+      <h2 class="section-title">Наши мастера</h2>
+    </div>
+    <div class="mp-grid" id="mpGrid">
+      <div class="loader"><div class="spin"></div></div>
+    </div>
+    <div style="text-align:center;margin-top:2.5rem">
+      <a href="masters.html" class="btn btn-outline btn-lg">Все мастера →</a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta-band">
+  <div class="container">
+    <h2>Готовы преобразиться?</h2>
+    <p>Запишитесь онлайн за 2 минуты — выберите услугу, мастера и удобное время</p>
+    <a href="booking.html" class="btn btn-gold btn-lg">Записаться сейчас</a>
+  </div>
+</section>
+
+<script src="js/api.js"></script>
+<script>
+const ICONS = { 'Волосы':'✂️', 'Ногти':'💅', 'Лицо':'🌿', 'Тело':'💆', 'Макияж':'💄' };
+
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const services = await api('/api/services');
+    // Hero card
+    document.getElementById('heroRows').innerHTML = services.slice(0,5).map(s => `
+      <div class="hc-row">
+        <div><div class="hc-name">${s.name_service}</div><div class="hc-meta">${s.duration} мин</div></div>
+        <div class="hc-price">${fmtPrice(s.price_service)}</div>
+      </div>`).join('');
+    // Services grid
+    document.getElementById('spGrid').innerHTML = services.slice(0,6).map(s => `
+      <div class="sp-card" onclick="location.href='services.html'">
+        <div class="sp-icon">${ICONS[s.service_types?.name_vid] || '✨'}</div>
+        <div class="sp-type">${s.service_types?.name_vid || ''}</div>
+        <div class="sp-name">${s.name_service}</div>
+        <div class="sp-desc">${s.description || ''}</div>
+        <div class="sp-foot">
+          <span class="sp-dur">⏱ ${s.duration} мин</span>
+          <span class="sp-price">${fmtPrice(s.price_service)}</span>
+        </div>
+      </div>`).join('');
+  } catch(e) {
+    document.getElementById('spGrid').innerHTML = '<div class="empty">Не удалось загрузить услуги</div>';
+  }
+
+  try {
+    const masters = await api('/api/masters');
+    document.getElementById('mpGrid').innerHTML = masters.slice(0,4).map(m => `
+      <div class="mp-card">
+        <div class="mp-avatar">${initials(m.fio_master)}</div>
+        <div class="mp-name">${m.fio_master}</div>
+        <div class="mp-spec">${m.specializations?.name_spec || ''}</div>
+      </div>`).join('');
+  } catch(e) {
+    document.getElementById('mpGrid').innerHTML = '<div class="empty">Не удалось загрузить</div>';
+  }
+});
+</script>
+</body>
+</html>

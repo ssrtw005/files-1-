@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Мастера — Belleza</title>
+<link rel="stylesheet" href="css/main.css">
+<style>
+.masters-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.6rem;
+}
+.mc {
+  background: var(--white); border-radius: var(--r);
+  border: 1px solid var(--ivory2); overflow: hidden;
+  transition: all var(--transition);
+}
+.mc:hover { box-shadow: var(--shadow-m); transform: translateY(-4px); }
+.mc-banner {
+  height: 100px;
+  background: linear-gradient(135deg, var(--plum) 0%, var(--plum2) 100%);
+  position: relative;
+}
+.mc-banner::after {
+  content: '✦';
+  position: absolute; right: 1.2rem; top: 50%; transform: translateY(-50%);
+  font-size: 2.5rem; color: rgba(255,255,255,.08);
+}
+.mc-body { padding: 0 1.6rem 1.8rem; }
+.mc-avatar {
+  width: 76px; height: 76px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--rose), var(--gold));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Playfair Display', serif; font-size: 1.6rem; color: #fff;
+  border: 4px solid var(--white);
+  margin-top: 0px; margin-bottom: 1rem;
+  box-shadow: var(--shadow-s);
+}
+.mc-name { font-family: 'Playfair Display', serif; font-size: 1.15rem; margin-bottom: .3rem; }
+.mc-spec {
+  font-size: .72rem; color: var(--rose); letter-spacing: .14em;
+  text-transform: uppercase; margin-bottom: 1rem;
+}
+.mc-meta { font-size: .82rem; color: var(--plum-lt); margin-bottom: .3rem; }
+.mc-schedule {
+  margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--ivory2);
+}
+.mc-schedule-title {
+  font-size: .68rem; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--plum-lt); margin-bottom: .6rem;
+}
+.mc-day {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: .3rem 0; font-size: .8rem;
+  border-bottom: 1px solid var(--ivory2);
+}
+.mc-day:last-child { border: none; }
+.mc-day-name { color: var(--plum); }
+.mc-day-time { color: var(--plum-lt); font-size: .75rem; }
+
+.mc-footer { padding: 1rem 1.6rem; border-top: 1px solid var(--ivory2); }
+.mc-footer .btn { width: 100%; }
+</style>
+</head>
+<body>
+<div id="toasts"></div>
+
+<div class="page-hero">
+  <div class="container">
+    <div class="page-hero-eyebrow">Команда профессионалов</div>
+    <h1 class="page-hero-title">Наши <em>мастера</em></h1>
+    <p class="page-hero-sub">Опытные специалисты, влюблённые в своё дело. Каждый мастер — профессионал с многолетним стажем.</p>
+  </div>
+</div>
+
+<section>
+  <div class="container">
+    <div class="masters-grid" id="mastersGrid">
+      <div class="loader"><div class="spin"></div><p>Загрузка мастеров...</p></div>
+    </div>
+  </div>
+</section>
+
+<script src="js/api.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const masters = await api('/api/masters');
+    const grid = document.getElementById('mastersGrid');
+
+    // load schedules for all masters
+    const schedules = await Promise.all(
+      masters.map(m => api(`/api/masters/${m.id_master}/schedule`).catch(() => []))
+    );
+
+    grid.innerHTML = masters.map((m, i) => {
+      const sch = schedules[i] || [];
+      const schHtml = sch.length
+        ? sch.map(s => `
+            <div class="mc-day">
+              <span class="mc-day-name">${s.weekdays?.day_name || ''}</span>
+              <span class="mc-day-time">${fmtTime(s.time_start)} – ${fmtTime(s.time_end)}</span>
+            </div>`).join('')
+        : '<div style="font-size:.8rem;color:var(--plum-lt)">Расписание уточняйте по телефону</div>';
+
+      return `
+      <div class="mc">
+        <div class="mc-banner"></div>
+        <div class="mc-body">
+          <div class="mc-avatar">${initials(m.fio_master)}</div>
+          <div class="mc-name">${m.fio_master}</div>
+          <div class="mc-spec">${m.specializations?.name_spec || ''}</div>
+          ${m.tel_master ? `<div class="mc-meta">📞 ${m.tel_master}</div>` : ''}
+          ${m.year_start ? `<div class="mc-meta">Стаж с ${m.year_start} года</div>` : ''}
+          <div class="mc-schedule">
+            <div class="mc-schedule-title">График работы</div>
+            ${schHtml}
+          </div>
+        </div>
+        <div class="mc-footer">
+          <button class="btn btn-primary btn-sm" onclick="bookMaster(${m.id_master})">Записаться к мастеру</button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    document.getElementById('mastersGrid').innerHTML = '<div class="empty">Не удалось загрузить данные</div>';
+  }
+});
+
+function bookMaster(id) {
+  sessionStorage.setItem('bz_preselect_master', id);
+  if (!isLoggedIn()) {
+    sessionStorage.setItem('bz_redirect', 'booking.html');
+    openModal('loginModal');
+  } else {
+    location.href = 'booking.html';
+  }
+}
+</script>
+</body>
+</html>

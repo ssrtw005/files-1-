@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Личный кабинет — Belleza</title>
+<link rel="stylesheet" href="css/main.css">
+<style>
+.cabinet-layout {
+  display: grid; grid-template-columns: 280px 1fr; gap: 2rem; align-items: start;
+}
+
+/* Sidebar */
+.cab-sidebar {
+  background: var(--white); border-radius: var(--r);
+  border: 1px solid var(--ivory2); overflow: hidden;
+  position: sticky; top: 90px;
+}
+.cab-profile {
+  background: linear-gradient(135deg, var(--plum), var(--plum2));
+  padding: 2rem; text-align: center;
+}
+.cab-avatar {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--rose), var(--gold));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Playfair Display', serif; font-size: 1.6rem; color: #fff;
+  margin: 0 auto 1rem; border: 3px solid rgba(255,255,255,.2);
+}
+.cab-name { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--ivory); margin-bottom: .3rem; }
+.cab-role { font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--rose-lt); }
+
+.cab-nav { padding: .8rem 0; }
+.cab-nav-item {
+  display: flex; align-items: center; gap: .8rem;
+  padding: .8rem 1.5rem; cursor: pointer; font-size: .88rem;
+  color: var(--plum-lt); transition: all var(--transition); border: none;
+  background: none; width: 100%; text-align: left; font-family: inherit;
+}
+.cab-nav-item:hover { color: var(--plum); background: var(--ivory); }
+.cab-nav-item.active { color: var(--rose); background: rgba(196,130,106,.08); border-left: 3px solid var(--rose); }
+.cab-nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+
+/* Content panels */
+.cab-panel { display: none; }
+.cab-panel.active { display: block; }
+
+.panel-title {
+  font-family: 'Playfair Display', serif; font-size: 1.6rem;
+  margin-bottom: 1.8rem;
+}
+
+/* Stats row */
+.stats-row {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-bottom: 2rem;
+}
+.stat-card {
+  background: var(--white); border-radius: var(--r-sm);
+  border: 1px solid var(--ivory2); padding: 1.4rem;
+  text-align: center;
+}
+.sc-num { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--rose); line-height: 1; }
+.sc-lbl { font-size: .75rem; color: var(--plum-lt); margin-top: .3rem; }
+
+/* Filter tabs */
+.tab-row { display: flex; gap: .5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.tab-pill {
+  padding: .4rem 1.1rem; border-radius: 20px; font-size: .75rem; letter-spacing: .08em;
+  text-transform: uppercase; border: 1.5px solid var(--ivory2); background: transparent;
+  color: var(--plum-lt); cursor: pointer; font-family: inherit; transition: all var(--transition);
+}
+.tab-pill.active { background: var(--plum); border-color: var(--plum); color: #fff; }
+
+/* Record cards (mobile-friendly) */
+.record-list { display: flex; flex-direction: column; gap: 1rem; }
+.record-card {
+  background: var(--white); border-radius: var(--r-sm);
+  border: 1px solid var(--ivory2); padding: 1.4rem;
+  display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: start;
+  transition: box-shadow var(--transition);
+}
+.record-card:hover { box-shadow: var(--shadow-s); }
+.rc-svc  { font-family: 'Playfair Display', serif; font-size: 1.05rem; margin-bottom: .3rem; }
+.rc-meta { font-size: .82rem; color: var(--plum-lt); }
+.rc-right { text-align: right; }
+.rc-price { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--rose); }
+.rc-date  { font-size: .8rem; color: var(--plum-lt); margin-top: .2rem; }
+
+/* Profile form */
+.profile-form {
+  background: var(--white); border-radius: var(--r);
+  border: 1px solid var(--ivory2); padding: 2rem; max-width: 540px;
+}
+
+@media(max-width:900px){
+  .cabinet-layout { grid-template-columns: 1fr; }
+  .cab-sidebar { position: static; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<div id="toasts"></div>
+
+<div class="page-hero" style="padding:120px 0 50px">
+  <div class="container">
+    <div class="page-hero-eyebrow">Личный кабинет</div>
+    <h1 class="page-hero-title">Мой <em>профиль</em></h1>
+  </div>
+</div>
+
+<section style="padding-top:2rem">
+  <div class="container">
+
+    <!-- Not logged in -->
+    <div id="notLogged" style="display:none;text-align:center;padding:4rem 0">
+      <div style="font-size:3rem;margin-bottom:1rem">🔐</div>
+      <h3 style="margin-bottom:.6rem">Необходима авторизация</h3>
+      <p style="color:var(--plum-lt);margin-bottom:1.5rem">Войдите в аккаунт, чтобы видеть свои записи и управлять профилем</p>
+      <div style="display:flex;gap:1rem;justify-content:center">
+        <button class="btn btn-outline btn-lg" onclick="openModal('loginModal')">Войти</button>
+        <button class="btn btn-primary btn-lg" onclick="openModal('registerModal')">Регистрация</button>
+      </div>
+    </div>
+
+    <!-- Cabinet -->
+    <div id="cabinetLayout" class="cabinet-layout" style="display:none">
+      <!-- Sidebar -->
+      <div class="cab-sidebar">
+        <div class="cab-profile">
+          <div class="cab-avatar" id="cabAvatar">??</div>
+          <div class="cab-name"  id="cabName">—</div>
+          <div class="cab-role"  id="cabRole">Клиент</div>
+        </div>
+        <div class="cab-nav">
+          <button class="cab-nav-item active" onclick="showPanel('pRecords',this)">
+            <span class="cab-nav-icon">📋</span> Мои записи
+          </button>
+          <button class="cab-nav-item" onclick="showPanel('pProfile',this)">
+            <span class="cab-nav-icon">👤</span> Профиль
+          </button>
+          <button class="cab-nav-item" onclick="location.href='booking.html'">
+            <span class="cab-nav-icon">➕</span> Новая запись
+          </button>
+          <button class="cab-nav-item" onclick="logout()" style="color:#b53a2f">
+            <span class="cab-nav-icon">🚪</span> Выйти
+          </button>
+        </div>
+      </div>
+
+      <!-- Main content -->
+      <div>
+        <!-- Panel: Records -->
+        <div class="cab-panel active" id="pRecords">
+          <div class="stats-row" id="statsRow">
+            <div class="stat-card"><div class="sc-num" id="stTotal">—</div><div class="sc-lbl">Всего записей</div></div>
+            <div class="stat-card"><div class="sc-num" id="stCompleted">—</div><div class="sc-lbl">Выполнено</div></div>
+            <div class="stat-card"><div class="sc-num" id="stSpent">—</div><div class="sc-lbl">Потрачено</div></div>
+          </div>
+          <h3 class="panel-title">Мои записи</h3>
+          <div class="tab-row">
+            <button class="tab-pill active" onclick="filterRecords(null,this)">Все</button>
+            <button class="tab-pill" onclick="filterRecords('pending',this)">Ожидают</button>
+            <button class="tab-pill" onclick="filterRecords('confirmed',this)">Подтверждены</button>
+            <button class="tab-pill" onclick="filterRecords('completed',this)">Выполнены</button>
+            <button class="tab-pill" onclick="filterRecords('cancelled',this)">Отменены</button>
+          </div>
+          <div class="record-list" id="recordsList">
+            <div class="loader"><div class="spin"></div></div>
+          </div>
+        </div>
+
+        <!-- Panel: Profile -->
+        <div class="cab-panel" id="pProfile">
+          <h3 class="panel-title">Мои данные</h3>
+          <div class="profile-form">
+            <div class="form-group"><label>ФИО</label><input type="text" id="pfFio" readonly></div>
+            <div class="form-group"><label>Email</label><input type="email" id="pfEmail" readonly></div>
+            <div class="form-group"><label>Телефон</label><input type="tel" id="pfPhone"></div>
+            <p style="font-size:.8rem;color:var(--plum-lt);margin-top:.5rem">Для изменения данных обратитесь к администратору.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="js/api.js"></script>
+<script>
+let allRecords = [];
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const u = getUser();
+  if (!u) { document.getElementById('notLogged').style.display = 'block'; return; }
+
+  // Redirect admin to admin panel
+  if (u.role === 'admin') { location.href = 'admin.html'; return; }
+
+  document.getElementById('cabinetLayout').style.display = 'grid';
+  document.getElementById('cabAvatar').textContent = initials(u.fio_client);
+  document.getElementById('cabName').textContent   = u.fio_client;
+  document.getElementById('cabRole').textContent   = 'Клиент';
+  document.getElementById('pfFio').value   = u.fio_client || '';
+  document.getElementById('pfEmail').value = u.email_client || '';
+  document.getElementById('pfPhone').value = u.tel_client || '';
+
+  await loadRecords();
+});
+
+async function loadRecords() {
+  try {
+    allRecords = await api('/api/records');
+    renderRecords(allRecords);
+    // stats
+    const completed = allRecords.filter(r => r.status === 'completed');
+    const spent = completed.reduce((s, r) => s + Number(r.price_service || 0), 0);
+    document.getElementById('stTotal').textContent     = allRecords.length;
+    document.getElementById('stCompleted').textContent = completed.length;
+    document.getElementById('stSpent').textContent     = fmtPrice(spent);
+  } catch(e) {
+    document.getElementById('recordsList').innerHTML = '<div class="empty">Ошибка загрузки</div>';
+  }
+}
+
+function renderRecords(list) {
+  const el = document.getElementById('recordsList');
+  if (!list.length) { el.innerHTML = '<div class="empty">Записей нет. <a href="booking.html" style="color:var(--rose)">Запишитесь онлайн!</a></div>'; return; }
+  el.innerHTML = list.map(r => `
+    <div class="record-card">
+      <div>
+        <div class="rc-svc">${r.name_service}</div>
+        <div class="rc-meta">Мастер: ${r.fio_master}</div>
+        ${r.comment ? `<div class="rc-meta" style="margin-top:.2rem">💬 ${r.comment}</div>` : ''}
+      </div>
+      <div class="rc-right">
+        <div><span class="badge badge-${r.status}">${statusLabel(r.status)}</span></div>
+        <div class="rc-price">${fmtPrice(r.price_service)}</div>
+        <div class="rc-date">📅 ${fmtDate(r.date_service)} в ${fmtTime(r.time_service)}</div>
+      </div>
+    </div>`).join('');
+}
+
+function filterRecords(status, btn) {
+  document.querySelectorAll('.tab-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderRecords(status ? allRecords.filter(r => r.status === status) : allRecords);
+}
+
+function showPanel(id, btn) {
+  document.querySelectorAll('.cab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.cab-nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById(id)?.classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>

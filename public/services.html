@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Услуги и прайс-лист — Belleza</title>
+<link rel="stylesheet" href="css/main.css">
+<style>
+/* Filter bar */
+.filter-bar {
+  display: flex; gap: .55rem; flex-wrap: wrap; margin-bottom: 2.5rem;
+}
+.fbtn {
+  padding: .45rem 1.3rem; border-radius: 30px;
+  font-size: .75rem; letter-spacing: .1em; text-transform: uppercase;
+  border: 1.5px solid var(--sand); background: transparent;
+  color: var(--plum-lt); cursor: pointer; font-family: inherit;
+  transition: all var(--transition);
+}
+.fbtn.active, .fbtn:hover { background: var(--rose); border-color: var(--rose); color: #fff; }
+
+/* Services grid */
+.svc-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 1.4rem;
+}
+.svc-card {
+  background: var(--white); border-radius: var(--r);
+  border: 1px solid var(--ivory2); padding: 1.8rem;
+  transition: all var(--transition); position: relative; overflow: hidden;
+}
+.svc-card:hover { box-shadow: var(--shadow-m); transform: translateY(-3px); }
+.svc-card::after {
+  content: ''; position: absolute; top: 0; right: 0;
+  width: 4px; height: 0; background: var(--rose);
+  transition: height .3s; border-radius: 0 var(--r) var(--r) 0;
+}
+.svc-card:hover::after { height: 100%; }
+.svc-type  { font-size: .68rem; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); margin-bottom: .45rem; }
+.svc-name  { font-family: 'Playfair Display', serif; font-size: 1.2rem; margin-bottom: .5rem; }
+.svc-desc  { font-size: .83rem; color: var(--plum-lt); line-height: 1.65; margin-bottom: 1.2rem; }
+.svc-foot  { display: flex; align-items: center; justify-content: space-between; }
+.svc-dur   { font-size: .8rem; color: var(--plum-lt); }
+.svc-price { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--rose); font-weight: 500; }
+.svc-book  {
+  margin-top: 1rem; width: 100%; padding: .55rem;
+  background: transparent; border: 1.5px solid var(--rose); border-radius: 30px;
+  color: var(--rose); font-size: .72rem; letter-spacing: .12em; text-transform: uppercase;
+  cursor: pointer; font-family: inherit; transition: all var(--transition);
+}
+.svc-book:hover { background: var(--rose); color: #fff; }
+
+/* Search bar */
+.search-wrap {
+  position: relative; margin-bottom: 2rem; max-width: 420px;
+}
+.search-wrap input {
+  padding-left: 2.8rem;
+}
+.search-icon {
+  position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
+  color: var(--plum-lt); font-size: 1rem; pointer-events: none;
+}
+</style>
+</head>
+<body>
+<div id="toasts"></div>
+
+<div class="page-hero">
+  <div class="container">
+    <div class="page-hero-eyebrow">Прайс-лист</div>
+    <h1 class="page-hero-title">Наши <em>услуги</em></h1>
+    <p class="page-hero-sub">Полный спектр услуг красоты — от стрижки до косметологии. Выберите и запишитесь онлайн.</p>
+    <a href="booking.html" class="btn btn-primary btn-lg">Записаться →</a>
+  </div>
+</div>
+
+<section>
+  <div class="container">
+    <!-- Search -->
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Поиск услуги...">
+    </div>
+    <!-- Filters -->
+    <div class="filter-bar" id="filterBar">
+      <button class="fbtn active" onclick="filterBy(null,this)">Все</button>
+    </div>
+    <!-- Grid -->
+    <div class="svc-grid" id="svcGrid">
+      <div class="loader"><div class="spin"></div><p>Загрузка...</p></div>
+    </div>
+  </div>
+</section>
+
+<script src="js/api.js"></script>
+<script>
+let allServices = [];
+
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const [services, types] = await Promise.all([
+      api('/api/services'),
+      api('/api/service-types')
+    ]);
+    allServices = services;
+
+    // build filter bar
+    const bar = document.getElementById('filterBar');
+    types.forEach(t => {
+      const btn = document.createElement('button');
+      btn.className = 'fbtn';
+      btn.textContent = t.name_vid;
+      btn.onclick = function(){ filterBy(t.id_vid, this); };
+      bar.appendChild(btn);
+    });
+
+    renderGrid(allServices);
+
+    // search
+    document.getElementById('searchInput').addEventListener('input', e => {
+      const q = e.target.value.toLowerCase();
+      renderGrid(allServices.filter(s =>
+        s.name_service.toLowerCase().includes(q) ||
+        (s.description||'').toLowerCase().includes(q)
+      ));
+    });
+  } catch(e) {
+    document.getElementById('svcGrid').innerHTML = '<div class="empty">Ошибка загрузки услуг</div>';
+  }
+});
+
+function filterBy(vidId, btn) {
+  document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderGrid(vidId ? allServices.filter(s => s.id_vid === vidId) : allServices);
+}
+
+function renderGrid(list) {
+  const g = document.getElementById('svcGrid');
+  if (!list.length) { g.innerHTML = '<div class="empty">Услуги не найдены</div>'; return; }
+  g.innerHTML = list.map(s => `
+    <div class="svc-card">
+      <div class="svc-type">${s.service_types?.name_vid || ''}</div>
+      <div class="svc-name">${s.name_service}</div>
+      <div class="svc-desc">${s.description || 'Профессиональная процедура'}</div>
+      <div class="svc-foot">
+        <span class="svc-dur">⏱ ${s.duration} мин</span>
+        <span class="svc-price">${fmtPrice(s.price_service)}</span>
+      </div>
+      <button class="svc-book" onclick="bookService(${s.id_service})">Записаться</button>
+    </div>`).join('');
+}
+
+function bookService(id) {
+  sessionStorage.setItem('bz_preselect_service', id);
+  if (!isLoggedIn()) {
+    sessionStorage.setItem('bz_redirect', 'booking.html');
+    openModal('loginModal');
+  } else {
+    location.href = 'booking.html';
+  }
+}
+</script>
+</body>
+</html>
