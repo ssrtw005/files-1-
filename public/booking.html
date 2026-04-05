@@ -182,14 +182,11 @@
           <h3 style="margin-bottom:1.2rem">Выберите дату и время</h3>
           <div class="form-row">
             <div class="form-group">
-              <label>Дата *</label>
-              <input type="date" id="bkDate" onchange="onDateChange()">
-            </div>
-            <div class="form-group">
-              <label>Время *</label>
-              <input type="time" id="bkTime" step="1800">
-            </div>
-          </div>
+  <label>Дата *</label>
+  <input type="date" id="bkDate" onchange="onDateChange()">
+  <div id="dateHint" style="font-size:.78rem;color:var(--plum-lt);margin-top:.4rem"></div>
+</div>
+<input type="hidden" id="bkTime" value="09:00">
           <div class="form-group">
             <label>Комментарий</label>
             <textarea id="bkComment" placeholder="Пожелания, особенности..."></textarea>
@@ -307,6 +304,37 @@ function selectMaster(id) {
   document.getElementById(`mo_${id}`)?.classList.add('selected');
   document.getElementById('step2Next').disabled = false;
   updateSummary();
+  updateAllowedDates();
+}
+
+async function updateAllowedDates() {
+  if (!sel.master) return;
+  try {
+    const sch = await api(`/api/masters/${sel.master.id_master}/schedule`);
+    // рабочие дни недели (0=вс,1=пн,...,6=сб)
+    const dayMap = { 1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:0 };
+    const workDays = sch.map(s => dayMap[s.id_day]);
+
+    const input = document.getElementById('bkDate');
+    const hint  = document.getElementById('dateHint');
+
+    const dayNames = ['вс','пн','вт','ср','чт','пт','сб'];
+    const workDayNames = sch.map(s => s.weekdays?.day_name).join(', ');
+    hint.textContent = `Мастер работает: ${workDayNames}`;
+
+    input.onchange = function() {
+      const date = new Date(this.value);
+      const dow  = date.getDay();
+      if (!workDays.includes(dow)) {
+        toast('Мастер не работает в этот день!', 'err');
+        this.value = '';
+        sel.date = '';
+      } else {
+        sel.date = this.value;
+      }
+      updateSummary();
+    };
+  } catch(e) {}
 }
 
 function preselectService(id) { selectService(id); }
@@ -342,15 +370,15 @@ function updateSummary() {
   document.getElementById('sumDur').textContent     = sel.service ? `${sel.service.duration} мин` : '—';
   document.getElementById('sumMaster').textContent  = sel.master?.fio_master || '—';
   document.getElementById('sumDate').textContent    = sel.date ? fmtDate(sel.date) : '—';
-  document.getElementById('sumTime').textContent    = sel.time ? fmtTime(sel.time) : '—';
+  document.getElementById('sumTime').textContent = 'Назначит администратор';
   document.getElementById('sumPrice').textContent   = sel.service ? fmtPrice(sel.service.price_service) : '—';
 }
 
 async function submitBooking() {
   const date = document.getElementById('bkDate').value;
-  const time = document.getElementById('bkTime').value;
+ const time = '09:00';
   const comment = document.getElementById('bkComment').value;
-  if (!sel.service || !sel.master || !date || !time) {
+  if (!sel.service || !sel.master || !date) {
     toast('Заполните все поля', 'err'); return;
   }
   try {
