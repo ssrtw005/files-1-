@@ -281,6 +281,23 @@ function selectService(id) {
   document.querySelectorAll('.svc-opt').forEach(el => el.classList.remove('selected'));
   document.getElementById(`so_${id}`)?.classList.add('selected');
   document.getElementById('step1Next').disabled = false;
+
+  // Фильтруем мастеров по специализации
+  const vidToSpec = { 1: 1, 2: 2, 3: 3, 4: 5, 5: 4 };
+  const specId = vidToSpec[sel.service.id_vid];
+  const filtered = specId ? allMasters.filter(m => m.id_spec === specId) : allMasters;
+
+  document.getElementById('mstPick').innerHTML = filtered.length
+    ? filtered.map(m => `
+        <div class="mst-opt" id="mo_${m.id_master}" onclick="selectMaster(${m.id_master})">
+          <div class="mst-opt-av">${initials(m.fio_master)}</div>
+          <div class="mst-opt-name">${m.fio_master}</div>
+          <div class="mst-opt-spec">${m.specializations?.name_spec || ''}</div>
+        </div>`).join('')
+    : '<div class="empty">Нет доступных мастеров</div>';
+
+  sel.master = null;
+  document.getElementById('step2Next').disabled = true;
   updateSummary();
 }
 
