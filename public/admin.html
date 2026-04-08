@@ -521,7 +521,8 @@ async function saveMaster() {
   const body = {
     fio_master: document.getElementById('m_fio').value,
     tel_master: document.getElementById('m_phone').value,
-    year_start: document.getElementById('m_year').value
+    year_start: document.getElementById('m_year').value,
+    id_spec: +document.getElementById('m_spec').value
   };
 
   if (!body.fio_master) {
