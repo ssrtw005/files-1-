@@ -314,6 +314,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('admName').textContent = u.fio_client || 'Администратор';
   loadDash();
   loadServiceTypes();
+  loadSpecializations();
   closeOnBackdrop('addSvcModal');
 });
 
@@ -434,6 +435,20 @@ async function loadServiceTypes() {
   sel.innerHTML = serviceTypes.map(t => `<option value="${t.id_vid}">${t.name_vid}</option>`).join('');
 }
 
+async function loadSpecializations() {
+  try {
+    specializations = await api('/api/specializations');
+
+    document.getElementById('m_spec').innerHTML =
+      specializations.map(s =>
+        `<option value="${s.id_spec}">${s.name_spec}</option>`
+      ).join('');
+  } catch (e) {
+    toast('Ошибка загрузки специализаций', 'err');
+  }
+}
+
+
 async function loadServicesTable() {
   try {
     const svcs = await api('/api/services');
@@ -504,7 +519,13 @@ async function loadMastersTable() {
               <td>${m.tel_master || ''}</td>
               <td>${m.year_start ? `с ${m.year_start}` : '—'}</td>
               <td>
-                <button class="btn btn-sm" onclick="editMaster(${m.id_master}, '${m.fio_master}', '${m.tel_master || ''}', '${m.year_start || ''}')">✏️</button>
+                <button class="btn btn-sm" onclick="editMaster(
+  ${m.id_master},
+  '${m.fio_master}',
+  '${m.tel_master || ''}',
+  '${m.year_start || ''}',
+  '${m.id_spec || ''}'
+)">✏️</button>
                 <button class="btn btn-danger btn-sm" onclick="deleteMaster(${m.id_master})">Удалить</button>
               </td>
             </tr>
@@ -540,18 +561,22 @@ async function saveMaster() {
   }
 }
 
-async function editMaster(id, fio, phone, year) {
+async function editMaster(id, fio, phone, year, specId) {
   const newFio = prompt('ФИО:', fio);
   if (!newFio) return;
 
   const newPhone = prompt('Телефон:', phone);
   const newYear = prompt('Год начала стажа:', year);
 
+  const specList = specializations.map(s => `${s.id_spec}: ${s.name_spec}`).join('\n');
+  const newSpec = prompt('Выбери ID специализации:\n' + specList, specId);
+
   try {
     await api(`/api/masters/${id}`, 'PATCH', {
       fio_master: newFio,
       tel_master: newPhone,
-      year_start: newYear
+      year_start: newYear,
+      id_spec: +newSpec
     });
 
     toast('Обновлено', 'ok');
