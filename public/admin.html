@@ -130,6 +130,9 @@
           <div class="adm-sep"></div>
           <button class="adm-item" onclick="showPanel('pServices',this)"><span class="adm-icon">✂️</span>Услуги</button>
           <div class="adm-sep"></div>
+          <button class="adm-item" onclick="showPanel('pMasters',this)">
+  <span class="adm-icon">👩‍🎨</span>Мастера
+</button>
           <button class="adm-item" onclick="logout()" style="color:#e08080"><span class="adm-icon">🚪</span>Выйти</button>
         </div>
       </div>
@@ -227,6 +230,26 @@
           </div>
         </div>
 
+        <!-- MASTERS MANAGEMENT -->
+<div class="adm-panel" id="pMasters">
+  <div class="panel-head">
+    <h3>Управление мастерами</h3>
+  </div>
+
+  <div class="svc-manage-head">
+    <span style="font-size:.85rem;color:var(--plum-lt)">
+      Список мастеров
+    </span>
+    <button class="btn btn-primary btn-sm" onclick="openModal('addMasterModal')">
+      + Добавить мастера
+    </button>
+  </div>
+
+  <div class="table-shell" id="mastersTable">
+    <div class="loader"><div class="spin"></div></div>
+  </div>
+</div>
+
       </div><!-- /content -->
     </div><!-- /admin-layout -->
   </div>
@@ -249,6 +272,30 @@
     <div class="form-actions">
       <button class="btn btn-outline" onclick="closeModal('addSvcModal')">Отмена</button>
       <button class="btn btn-primary" onclick="saveService()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="addMasterModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 class="modal-title">Добавить мастера</h3>
+      <button class="modal-x" onclick="closeModal('addMasterModal')">✕</button>
+    </div>
+
+    <div class="form-group">
+      <label>ФИО *</label>
+      <input type="text" id="m_fio">
+    </div>
+
+    <div class="form-group">
+      <label>Телефон</label>
+      <input type="text" id="m_phone">
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="closeModal('addMasterModal')">Отмена</button>
+      <button class="btn btn-primary" onclick="saveMaster()">Сохранить</button>
     </div>
   </div>
 </div>
@@ -405,6 +452,7 @@ async function loadServicesTable() {
   } catch(e) { toast(e.message, 'err'); }
 }
 
+
 async function saveService() {
   const body = {
     name_service:  document.getElementById('sv_name').value,
@@ -430,10 +478,97 @@ async function deleteService(id) {
   } catch(e) { toast(e.message, 'err'); }
 }
 
+async function loadMastersTable() {
+  try {
+    const masters = await api('/api/masters');
+
+    document.getElementById('mastersTable').innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>ФИО</th>
+            <th>Телефон</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${masters.map(m => `
+            <tr>
+              <td>${m.id_master}</td>
+              <td>${m.fio_master}</td>
+              <td>${m.tel_master || ''}</td>
+              <td>
+                <button class="btn btn-sm" onclick="editMaster(${m.id_master}, '${m.fio_master}', '${m.tel_master || ''}')">✏️</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteMaster(${m.id_master})">Удалить</button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  } catch (e) {
+    toast(e.message, 'err');
+  }
+}
+
+async function saveMaster() {
+  const body = {
+    fio_master: document.getElementById('m_fio').value,
+    tel_master: document.getElementById('m_phone').value
+  };
+
+  if (!body.fio_master) {
+    toast('Введите ФИО', 'err');
+    return;
+  }
+
+  try {
+    await api('/api/masters', 'POST', body);
+    toast('Мастер добавлен', 'ok');
+    closeModal('addMasterModal');
+    loadMastersTable();
+  } catch (e) {
+    toast(e.message, 'err');
+  }
+}
+
+async function editMaster(id, fio, phone) {
+  const newFio = prompt('ФИО:', fio);
+  if (!newFio) return;
+
+  const newPhone = prompt('Телефон:', phone);
+
+  try {
+    await api(`/api/masters/${id}`, 'PATCH', {
+      fio_master: newFio,
+      tel_master: newPhone
+    });
+
+    toast('Обновлено', 'ok');
+    loadMastersTable();
+  } catch (e) {
+    toast(e.message, 'err');
+  }
+}
+
+async function deleteMaster(id) {
+  if (!confirm('Удалить мастера?')) return;
+
+  try {
+    await api(`/api/masters/${id}`, 'DELETE');
+    toast('Удалено', 'ok');
+    loadMastersTable();
+  } catch (e) {
+    toast(e.message, 'err');
+  }
+}
+
 /* ── Panel switching ── */
 const panelLoaders = {
   pAllRecords: loadAllRecords,
   pServices:   loadServicesTable,
+   pMasters:    loadMastersTable,
 };
 function showPanel(id, btn) {
   document.querySelectorAll('.adm-panel').forEach(p => p.classList.remove('active'));
