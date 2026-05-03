@@ -219,7 +219,7 @@ function injectFooter() {
       <div class="footer-grid">
         <div>
           <div class="footer-logo">Bel<span>leza</span></div>
-          <p class="footer-desc">Профессиональный салон красоты. Доверьте свой образ нашим мастерам.</p>
+          <p class="footer-desc" style="color:var(--ivory2);opacity:1">Профессиональный салон красоты. Доверьте свой образ нашим мастерам.</p>
         </div>
         <div>
           <div class="footer-h">Навигация</div>
@@ -241,7 +241,7 @@ function injectFooter() {
         </div>
       </div>
       <div class="footer-bottom">
-        <span class="footer-copy">© 2025 Belleza · Дипломный проект</span>
+        <span class="footer-copy">© 2026 Belleza · Дипломный проект</span>
       </div>
     </div>
   </footer>`;
