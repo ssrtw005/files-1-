@@ -133,6 +133,8 @@
           <button class="adm-item" onclick="showPanel('pMasters',this)">
   <span class="adm-icon">👩‍🎨</span>Мастера
 </button>
+<button class="adm-item" onclick="showPanel('pClients',this)"><span class="adm-icon">👥</span>Клиенты</button>
+<button class="adm-item" onclick="showPanel('pNewRecord',this)"><span class="adm-icon">➕</span>Создать запись</button>
 <div class="adm-sep"></div>
           <button class="adm-item" onclick="logout()" style="color:#e08080"><span class="adm-icon">🚪</span>Выйти</button>
         </div>
@@ -251,10 +253,76 @@
   </div>
 </div>
 
+<!-- CLIENTS PANEL -->
+<div class="adm-panel" id="pClients">
+  <div class="panel-head"><h3>Клиенты</h3><p>Управление клиентами салона</p></div>
+  <div class="svc-manage-head">
+    <span style="font-size:.85rem;color:var(--plum-lt)">Список клиентов</span>
+    <button class="btn btn-primary btn-sm" onclick="openModal('addClientModal')">+ Добавить клиента</button>
+  </div>
+  <div class="table-shell" id="clientsTable">
+    <div class="loader"><div class="spin"></div></div>
+  </div>
+</div>
+
+<!-- NEW RECORD PANEL -->
+<div class="adm-panel" id="pNewRecord">
+  <div class="panel-head"><h3>Создать запись</h3><p>Запись клиента от имени администратора</p></div>
+  <div class="rpt-form">
+    <div class="form-group">
+      <label>Клиент *</label>
+      <select id="nr_client"></select>
+    </div>
+    <div class="form-group">
+      <label>Услуга *</label>
+      <select id="nr_service" onchange="onNrServiceChange()"></select>
+    </div>
+    <div class="form-group">
+      <label>Мастер *</label>
+      <select id="nr_master"></select>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Дата *</label>
+        <input type="date" id="nr_date">
+      </div>
+      <div class="form-group">
+        <label>Время *</label>
+        <input type="time" id="nr_time" value="10:00" step="1800">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Комментарий</label>
+      <textarea id="nr_comment" placeholder="Пожелания..."></textarea>
+    </div>
+    <button class="btn btn-primary" onclick="submitAdminRecord()">Создать запись</button>
+  </div>
+</div>
+
       </div><!-- /content -->
     </div><!-- /admin-layout -->
   </div>
 </section>
+
+<!-- Add Client Modal -->
+<div class="overlay" id="addClientModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 class="modal-title">Добавить клиента</h3>
+      <button class="modal-x" onclick="closeModal('addClientModal')">✕</button>
+    </div>
+    <div class="form-group"><label>ФИО *</label><input type="text" id="cl_fio" placeholder="Иванова Мария Сергеевна"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Email *</label><input type="email" id="cl_email"></div>
+      <div class="form-group"><label>Телефон</label><input type="tel" id="cl_phone" placeholder="+7 900 000-00-00"></div>
+    </div>
+    <div class="form-group"><label>Пароль *</label><input type="password" id="cl_password" placeholder="Минимум 6 символов"></div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="closeModal('addClientModal')">Отмена</button>
+      <button class="btn btn-primary" onclick="saveClient()">Сохранить</button>
+    </div>
+  </div>
+</div>
 
 <!-- Add Service Modal -->
 <div class="overlay" id="addSvcModal">
@@ -613,6 +681,8 @@ const panelLoaders = {
   pAllRecords: loadAllRecords,
   pServices:   loadServicesTable,
    pMasters:    loadMastersTable,
+   pClients:    loadClientsTable,
+  pNewRecord:  loadNewRecordForm,
 };
 function showPanel(id, btn) {
   document.querySelectorAll('.adm-panel').forEach(p => p.classList.remove('active'));
@@ -620,6 +690,108 @@ function showPanel(id, btn) {
   document.getElementById(id)?.classList.add('active');
   btn.classList.add('active');
   if (panelLoaders[id]) panelLoaders[id]();
+}
+// ── Clients ──
+async function loadClientsTable() {
+  try {
+    const clients = await api('/api/clients');
+    document.getElementById('clientsTable').innerHTML = `<table>
+      <thead><tr><th>ID</th><th>ФИО</th><th>Email</th><th>Телефон</th><th>Роль</th></tr></thead>
+      <tbody>${clients.map(c => `
+        <tr>
+          <td>${c.id_client}</td>
+          <td>${c.fio_client}</td>
+          <td>${c.email_client}</td>
+          <td>${c.tel_client || '—'}</td>
+          <td><span class="badge ${c.role === 'admin' ? 'badge-completed' : 'badge-confirmed'}">${c.role}</span></td>
+        </tr>`).join('')}
+      </tbody></table>`;
+    // populate client select in new record form
+    const sel = document.getElementById('nr_client');
+    sel.innerHTML = '<option value="">— Выберите клиента —</option>' +
+      clients.filter(c => c.role === 'client').map(c =>
+        `<option value="${c.id_client}">${c.fio_client} (${c.email_client})</option>`).join('');
+  } catch(e) { toast(e.message, 'err'); }
+}
+
+async function saveClient() {
+  const body = {
+    fio_client:  document.getElementById('cl_fio').value,
+    email_client: document.getElementById('cl_email').value,
+    tel_client:  document.getElementById('cl_phone').value,
+    password:    document.getElementById('cl_password').value
+  };
+  if (!body.fio_client || !body.email_client || !body.password) {
+    toast('Заполните обязательные поля', 'err'); return;
+  }
+  try {
+    await api('/api/auth/register', 'POST', body);
+    toast('Клиент добавлен', 'ok');
+    closeModal('addClientModal');
+    loadClientsTable();
+  } catch(e) { toast(e.message, 'err'); }
+}
+
+// ── New record by admin ──
+let allServicesAdmin = [], allMastersAdmin = [];
+
+async function loadNewRecordForm() {
+  const [services, masters, clients] = await Promise.all([
+    api('/api/services'), api('/api/masters'), api('/api/clients')
+  ]);
+  allServicesAdmin = services;
+  allMastersAdmin  = masters;
+
+  document.getElementById('nr_service').innerHTML =
+    '<option value="">— Выберите услугу —</option>' +
+    services.map(s => `<option value="${s.id_service}">${s.name_service} — ${fmtPrice(s.price_service)}</option>`).join('');
+
+  document.getElementById('nr_master').innerHTML =
+    '<option value="">— Выберите мастера —</option>' +
+    masters.map(m => `<option value="${m.id_master}">${m.fio_master}</option>`).join('');
+
+  const sel = document.getElementById('nr_client');
+  sel.innerHTML = '<option value="">— Выберите клиента —</option>' +
+    clients.filter(c => c.role === 'client').map(c =>
+      `<option value="${c.id_client}">${c.fio_client} (${c.email_client})</option>`).join('');
+
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('nr_date').min = today;
+}
+
+function onNrServiceChange() {
+  const id = +document.getElementById('nr_service').value;
+  const svc = allServicesAdmin.find(s => s.id_service === id);
+  if (!svc) return;
+  const vidToSpec = { 1:1, 2:2, 3:3, 4:5, 5:4 };
+  const specId = vidToSpec[svc.id_vid];
+  const filtered = specId ? allMastersAdmin.filter(m => m.id_spec === specId) : allMastersAdmin;
+  document.getElementById('nr_master').innerHTML =
+    '<option value="">— Выберите мастера —</option>' +
+    filtered.map(m => `<option value="${m.id_master}">${m.fio_master}</option>`).join('');
+}
+
+async function submitAdminRecord() {
+  const id_client  = +document.getElementById('nr_client').value;
+  const id_service = +document.getElementById('nr_service').value;
+  const id_master  = +document.getElementById('nr_master').value;
+  const date_service = document.getElementById('nr_date').value;
+  const time_service = document.getElementById('nr_time').value;
+  const comment    = document.getElementById('nr_comment').value;
+
+  if (!id_client || !id_service || !id_master || !date_service || !time_service) {
+    toast('Заполните все обязательные поля', 'err'); return;
+  }
+  try {
+    await api('/api/records/admin', 'POST', { id_client, id_service, id_master, date_service, time_service, comment });
+    toast('Запись создана! 🌸', 'ok');
+    document.getElementById('nr_client').value  = '';
+    document.getElementById('nr_service').value = '';
+    document.getElementById('nr_master').value  = '';
+    document.getElementById('nr_date').value    = '';
+    document.getElementById('nr_time').value    = '10:00';
+    document.getElementById('nr_comment').value = '';
+  } catch(e) { toast(e.message, 'err'); }
 }
 </script>
 </body>
