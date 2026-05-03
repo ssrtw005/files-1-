@@ -292,6 +292,28 @@ app.get('/api/reports/journal', authMiddleware, async (req, res) => {
 // =====================================================
 // СПРАВОЧНИКИ
 // =====================================================
+// GET /api/clients — список клиентов (admin)
+app.get('/api/clients', authMiddleware, adminOnly, async (req, res) => {
+  const { data, error } = await supabase
+    .from('clients')
+    .select('id_client, fio_client, email_client, tel_client, role')
+    .order('fio_client');
+  if (error) return res.status(500).json({ error });
+  res.json(data);
+});
+
+// POST /api/records/admin — создать запись от имени админа
+app.post('/api/records/admin', authMiddleware, adminOnly, async (req, res) => {
+  const { id_client, id_service, id_master, date_service, time_service, comment } = req.body;
+  const { count } = await supabase.from('records').select('*', { count: 'exact', head: true });
+  const id_zayav = (count || 0) + 1;
+  const { data, error } = await supabase
+    .from('records')
+    .insert({ id_zayav, id_client, id_service, id_master, date_service, time_service, comment, status: 'confirmed' })
+    .select().single();
+  if (error) return res.status(400).json({ error });
+  res.json(data);
+});
 app.get('/api/service-types',    async (_, res) => { const { data } = await supabase.from('service_types').select('*');    res.json(data); });
 app.get('/api/specializations',  async (_, res) => { const { data } = await supabase.from('specializations').select('*');  res.json(data); });
 app.get('/api/weekdays',         async (_, res) => { const { data } = await supabase.from('weekdays').select('*');         res.json(data); });
