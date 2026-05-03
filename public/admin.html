@@ -87,6 +87,20 @@
   .adm-sidebar { position: static; }
   .dash-grid { grid-template-columns: 1fr 1fr; }
 }
+
+@media(max-width:768px){
+  .admin-layout { grid-template-columns: 1fr; }
+  .adm-sidebar { position: static; }
+  .adm-sidebar-head { padding: 1rem; }
+  .adm-nav { display: flex; flex-wrap: wrap; padding: .4rem; gap: .3rem; }
+  .adm-item { width: auto; padding: .5rem .8rem; font-size: .75rem; border-radius: 20px; border-left: none !important; }
+  .adm-item.active { border-radius: 20px; }
+  .adm-sep { display: none; }
+  .dash-grid { grid-template-columns: 1fr 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+  .table-shell { font-size: .78rem; }
+  thead th, tbody td { padding: .6rem .7rem; }
+}
 </style>
 </head>
 <body>
