@@ -179,7 +179,7 @@
 
         <!-- Step 3: Date/Time -->
         <div class="step-panel" id="sp3">
-          <h3 style="margin-bottom:1.2rem">Выберите дату и время</h3>
+          <h3 style="margin-bottom:1.2rem">Выберите дату</h3>
           <div class="form-row">
             <div class="form-group">
                <div class="form-group">
@@ -187,7 +187,10 @@
   <input type="date" id="bkDate" onchange="onDateChange()">
   <div id="dateHint" style="font-size:.78rem;color:var(--plum-lt);margin-top:.4rem"></div>
 </div>
-<input type="hidden" id="bkTime" value="09:00">
+<div style="background:var(--ivory2);border-radius:var(--r-sm);padding:.8rem 1rem;font-size:.85rem;color:var(--plum-lt);margin-bottom:1rem">
+  ⏰ Время записи назначит администратор после подтверждения заявки
+</div>
+<input type="hidden" id="bkTime" value="00:00">
 </div>
           <div class="form-group">
             <label>Комментарий</label>
