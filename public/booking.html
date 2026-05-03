@@ -6,7 +6,7 @@
 <title>Онлайн-запись — Belleza</title>
 <link rel="stylesheet" href="css/main.css">
 <style>
-  .fbtn {
+.fbtn {
   padding: .38rem 1rem; border-radius: 20px; font-size: .72rem;
   letter-spacing: .1em; text-transform: uppercase;
   border: 1.5px solid var(--sand); background: transparent;
@@ -19,7 +19,6 @@
   display: grid; grid-template-columns: 1fr 380px; gap: 2.5rem; align-items: start;
 }
 
-/* Step wizard */
 .steps {
   display: flex; gap: 0; margin-bottom: 2.5rem; position: relative;
 }
@@ -28,9 +27,7 @@
   position: absolute; top: 20px; left: 20px; right: 20px; height: 1px;
   background: var(--ivory2); z-index: 0;
 }
-.step {
-  flex: 1; text-align: center; position: relative; z-index: 1;
-}
+.step { flex: 1; text-align: center; position: relative; z-index: 1; }
 .step-num {
   width: 40px; height: 40px; border-radius: 50%;
   background: var(--ivory2); color: var(--plum-lt);
@@ -43,11 +40,9 @@
 .step-label { font-size: .7rem; color: var(--plum-lt); letter-spacing: .08em; text-transform: uppercase; }
 .step.active .step-label { color: var(--rose); }
 
-/* Step panels */
 .step-panel { display: none; }
 .step-panel.active { display: block; }
 
-/* Service picker */
 .svc-pick {
   display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;
 }
@@ -62,7 +57,6 @@
 .svc-opt-meta  { font-size: .75rem; color: var(--plum-lt); }
 .svc-opt-price { font-size: .9rem; color: var(--rose); font-weight: 500; margin-top: .4rem; }
 
-/* Master picker */
 .mst-pick {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; margin-top: 1rem;
 }
@@ -83,7 +77,6 @@
 .mst-opt-name { font-size: .82rem; line-height: 1.3; }
 .mst-opt-spec { font-size: .68rem; color: var(--plum-lt); margin-top: .2rem; }
 
-/* Summary card */
 .summary-card {
   background: var(--white); border-radius: var(--r);
   border: 1px solid var(--ivory2); padding: 1.8rem;
@@ -103,7 +96,6 @@
   display: flex; justify-content: space-between; align-items: baseline;
 }
 
-/* Confirm */
 .confirm-box {
   background: rgba(201,130,106,.07); border: 1px solid var(--rose-lt);
   border-radius: var(--r); padding: 2rem; text-align: center;
@@ -112,7 +104,6 @@
 .confirm-box h3 { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: .6rem; }
 .confirm-box p  { color: var(--plum-lt); margin-bottom: 1.5rem; }
 
-/* Not-logged banner */
 .auth-banner {
   background: var(--ivory2); border-radius: var(--r);
   padding: 3rem; text-align: center;
@@ -123,6 +114,7 @@
 @media(max-width:900px){
   .booking-wrap { grid-template-columns: 1fr; }
   .svc-pick { grid-template-columns: 1fr 1fr; }
+  .summary-card { position: static; }
 }
 @media(max-width:500px){ .svc-pick { grid-template-columns: 1fr; } }
 </style>
@@ -140,6 +132,7 @@
 
 <section>
   <div class="container">
+
     <!-- Not logged in -->
     <div id="authBanner" class="auth-banner" style="display:none">
       <div style="font-size:2.5rem;margin-bottom:1rem">🔐</div>
@@ -153,21 +146,22 @@
 
     <!-- Booking form -->
     <div id="bookingWrap" class="booking-wrap" style="display:none">
+
+      <!-- LEFT: steps -->
       <div>
-        <!-- Steps -->
         <div class="steps">
           <div class="step active" id="step-ind-1"><div class="step-num">1</div><div class="step-label">Услуга</div></div>
           <div class="step" id="step-ind-2"><div class="step-num">2</div><div class="step-label">Мастер</div></div>
-          <div class="step" id="step-ind-3"><div class="step-num">3</div><div class="step-label">Дата и время</div></div>
+          <div class="step" id="step-ind-3"><div class="step-num">3</div><div class="step-label">Дата</div></div>
           <div class="step" id="step-ind-4"><div class="step-num">4</div><div class="step-label">Подтверждение</div></div>
         </div>
 
         <!-- Step 1: Service -->
         <div class="step-panel active" id="sp1">
           <h3 style="margin-bottom:.4rem">Выберите услугу</h3>
-<p style="font-size:.88rem;color:var(--plum-lt);margin-bottom:.8rem">Нажмите на карточку для выбора</p>
-<div id="svcFilterBar" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem"></div>
-<div class="svc-pick" id="svcPick">
+          <p style="font-size:.88rem;color:var(--plum-lt);margin-bottom:.8rem">Нажмите на карточку для выбора</p>
+          <div id="svcFilterBar" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem"></div>
+          <div class="svc-pick" id="svcPick">
             <div class="loader"><div class="spin"></div></div>
           </div>
           <div style="margin-top:1.5rem;display:flex;justify-content:flex-end">
@@ -188,28 +182,25 @@
           </div>
         </div>
 
-        <!-- Step 3: Date/Time -->
+        <!-- Step 3: Date -->
         <div class="step-panel" id="sp3">
           <h3 style="margin-bottom:1.2rem">Выберите дату</h3>
-          <div class="form-row">
-            <div class="form-group">
-               <div class="form-group">
-  <label>Дата *</label>
-  <input type="date" id="bkDate" onchange="onDateChange()">
-  <div id="dateHint" style="font-size:.78rem;color:var(--plum-lt);margin-top:.4rem"></div>
-</div>
-<div style="background:var(--ivory2);border-radius:var(--r-sm);padding:.8rem 1rem;font-size:.85rem;color:var(--plum-lt);margin-bottom:1rem">
-  ⏰ Время записи назначит администратор после подтверждения заявки
-</div>
-<input type="hidden" id="bkTime" value="00:00">
-</div>
+          <div class="form-group">
+            <label>Дата *</label>
+            <input type="date" id="bkDate" onchange="onDateChange()">
+            <div id="dateHint" style="font-size:.78rem;color:var(--plum-lt);margin-top:.4rem"></div>
+          </div>
+          <div style="background:var(--ivory2);border-radius:var(--r-sm);padding:.8rem 1rem;font-size:.85rem;color:var(--plum-lt);margin-bottom:1rem">
+            ⏰ Время записи назначит администратор после подтверждения заявки
+          </div>
+          <input type="hidden" id="bkTime" value="00:00">
           <div class="form-group">
             <label>Комментарий</label>
             <textarea id="bkComment" placeholder="Пожелания, особенности..."></textarea>
           </div>
           <div style="display:flex;justify-content:space-between;margin-top:1rem">
             <button class="btn btn-outline" onclick="goStep(2)">← Назад</button>
-            <button class="btn btn-primary" onclick="submitBooking()" id="step3Next">Записаться</button>
+            <button class="btn btn-primary" onclick="submitBooking()">Записаться</button>
           </div>
         </div>
 
@@ -227,7 +218,7 @@
         </div>
       </div>
 
-      <!-- Summary sidebar -->
+      <!-- RIGHT: Summary sidebar -->
       <div class="summary-card" id="summarySidebar">
         <div class="sum-title">Ваша запись</div>
         <div class="sum-row"><span class="sum-key">Услуга</span><span class="sum-val" id="sumService">—</span></div>
@@ -237,6 +228,7 @@
         <div class="sum-row"><span class="sum-key">Время</span><span class="sum-val" id="sumTime">—</span></div>
         <div class="sum-price"><span>Итого</span><span id="sumPrice">—</span></div>
       </div>
+
     </div>
   </div>
 </section>
@@ -248,7 +240,6 @@ let sel = { service: null, master: null, date: '', time: '', comment: '' };
 let curStep = 1;
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // set min date
   document.getElementById('bkDate').min = new Date().toISOString().split('T')[0];
 
   if (!isLoggedIn()) {
@@ -258,7 +249,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('bookingWrap').style.display = 'grid';
   await loadData();
 
-  // preselect from sessionStorage (from services/masters page)
   const preService = sessionStorage.getItem('bz_preselect_service');
   const preMaster  = sessionStorage.getItem('bz_preselect_master');
   if (preService) { sessionStorage.removeItem('bz_preselect_service'); preselectService(+preService); }
@@ -272,7 +262,6 @@ async function loadData() {
 }
 
 function renderServicePick() {
-  // build filter bar
   const bar = document.getElementById('svcFilterBar');
   const types = [...new Map(allServices.map(s => [s.id_vid, s.service_types?.name_vid])).entries()];
   bar.innerHTML = `<button class="fbtn active" onclick="filterBookingServices(null,this)">Все</button>` +
@@ -310,7 +299,6 @@ function selectService(id) {
   document.getElementById(`so_${id}`)?.classList.add('selected');
   document.getElementById('step1Next').disabled = false;
 
-  // Фильтруем мастеров по специализации
   const vidToSpec = { 1: 1, 2: 2, 3: 3, 4: 5, 5: 4 };
   const specId = vidToSpec[sel.service.id_vid];
   const filtered = specId ? allMasters.filter(m => m.id_spec === specId) : allMasters;
@@ -342,18 +330,13 @@ async function updateAllowedDates() {
   if (!sel.master) return;
   try {
     const sch = await api(`/api/masters/${sel.master.id_master}/schedule`);
-    // рабочие дни недели (0=вс,1=пн,...,6=сб)
     const dayMap = { 1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:0 };
     const workDays = sch.map(s => dayMap[s.id_day]);
-
-    const input = document.getElementById('bkDate');
-    const hint  = document.getElementById('dateHint');
-
-    const dayNames = ['вс','пн','вт','ср','чт','пт','сб'];
+    const hint = document.getElementById('dateHint');
     const workDayNames = sch.map(s => s.weekdays?.day_name).join(', ');
     hint.textContent = `Мастер работает: ${workDayNames}`;
 
-    input.onchange = function() {
+    document.getElementById('bkDate').onchange = function() {
       const date = new Date(this.value);
       const dow  = date.getDay();
       if (!workDays.includes(dow)) {
@@ -390,33 +373,28 @@ function onDateChange() {
   updateSummary();
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('bkTime')?.addEventListener('change', e => {
-    sel.time = e.target.value; updateSummary();
-  });
-});
-
 function updateSummary() {
   document.getElementById('sumService').textContent = sel.service?.name_service || '—';
   document.getElementById('sumDur').textContent     = sel.service ? `${sel.service.duration} мин` : '—';
   document.getElementById('sumMaster').textContent  = sel.master?.fio_master || '—';
   document.getElementById('sumDate').textContent    = sel.date ? fmtDate(sel.date) : '—';
-  document.getElementById('sumTime').textContent = 'Назначит администратор';
+  document.getElementById('sumTime').textContent    = '—';
   document.getElementById('sumPrice').textContent   = sel.service ? fmtPrice(sel.service.price_service) : '—';
 }
 
 async function submitBooking() {
-  const date = document.getElementById('bkDate').value;
- const time = '09:00';
+  const date    = document.getElementById('bkDate').value;
   const comment = document.getElementById('bkComment').value;
   if (!sel.service || !sel.master || !date) {
     toast('Заполните все поля', 'err'); return;
   }
   try {
     await api('/api/records', 'POST', {
-      id_service: sel.service.id_service,
-      id_master:  sel.master.id_master,
-      date_service: date, time_service: time, comment
+      id_service:   sel.service.id_service,
+      id_master:    sel.master.id_master,
+      date_service: date,
+      time_service: '00:00',
+      comment
     });
     goStep(4);
     toast('Запись успешно оформлена! 🌸', 'ok');
@@ -428,8 +406,7 @@ async function submitBooking() {
 function resetBooking() {
   sel = { service: null, master: null, date: '', time: '', comment: '' };
   document.querySelectorAll('.svc-opt,.mst-opt').forEach(el => el.classList.remove('selected'));
-  document.getElementById('bkDate').value = '';
-  document.getElementById('bkTime').value = '';
+  document.getElementById('bkDate').value    = '';
   document.getElementById('bkComment').value = '';
   document.getElementById('step1Next').disabled = true;
   document.getElementById('step2Next').disabled = true;
