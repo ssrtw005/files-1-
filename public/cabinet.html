@@ -235,8 +235,8 @@ function renderRecords(list) {
       <div class="rc-right">
         <div><span class="badge badge-${r.status}">${statusLabel(r.status)}</span></div>
         <div class="rc-price">${fmtPrice(r.price_service)}</div>
-        <div class="rc-date">📅 ${fmtDate(r.date_service)} в ${fmtTime(r.time_service)}</div>
-      </div>
+        <div class="rc-date">📅 ${fmtDate(r.date_service)}${r.time_service && r.time_service !== '00:00' ? ' в ' + fmtTime(r.time_service) : ' · время уточняется'}</div>
+        </div>
     </div>`).join('');
 }
 
