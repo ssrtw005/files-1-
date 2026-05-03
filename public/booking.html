@@ -6,6 +6,15 @@
 <title>Онлайн-запись — Belleza</title>
 <link rel="stylesheet" href="css/main.css">
 <style>
+  .fbtn {
+  padding: .38rem 1rem; border-radius: 20px; font-size: .72rem;
+  letter-spacing: .1em; text-transform: uppercase;
+  border: 1.5px solid var(--sand); background: transparent;
+  color: var(--plum-lt); cursor: pointer; font-family: inherit;
+  transition: all var(--transition);
+}
+.fbtn.active, .fbtn:hover { background: var(--rose); border-color: var(--rose); color: #fff; }
+
 .booking-wrap {
   display: grid; grid-template-columns: 1fr 380px; gap: 2.5rem; align-items: start;
 }
@@ -79,6 +88,7 @@
   background: var(--white); border-radius: var(--r);
   border: 1px solid var(--ivory2); padding: 1.8rem;
   position: sticky; top: 90px;
+  align-self: start;
 }
 .sum-title {
   font-family: 'Playfair Display', serif; font-size: 1.2rem; margin-bottom: 1.4rem;
@@ -155,8 +165,9 @@
         <!-- Step 1: Service -->
         <div class="step-panel active" id="sp1">
           <h3 style="margin-bottom:.4rem">Выберите услугу</h3>
-          <p style="font-size:.88rem;color:var(--plum-lt);margin-bottom:1rem">Нажмите на карточку для выбора</p>
-          <div class="svc-pick" id="svcPick">
+<p style="font-size:.88rem;color:var(--plum-lt);margin-bottom:.8rem">Нажмите на карточку для выбора</p>
+<div id="svcFilterBar" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem"></div>
+<div class="svc-pick" id="svcPick">
             <div class="loader"><div class="spin"></div></div>
           </div>
           <div style="margin-top:1.5rem;display:flex;justify-content:flex-end">
@@ -261,7 +272,22 @@ async function loadData() {
 }
 
 function renderServicePick() {
-  document.getElementById('svcPick').innerHTML = allServices.map(s => `
+  // build filter bar
+  const bar = document.getElementById('svcFilterBar');
+  const types = [...new Map(allServices.map(s => [s.id_vid, s.service_types?.name_vid])).entries()];
+  bar.innerHTML = `<button class="fbtn active" onclick="filterBookingServices(null,this)">Все</button>` +
+    types.map(([id, name]) => `<button class="fbtn" onclick="filterBookingServices(${id},this)">${name}</button>`).join('');
+  renderFilteredServices(allServices);
+}
+
+function filterBookingServices(vidId, btn) {
+  document.querySelectorAll('#svcFilterBar .fbtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderFilteredServices(vidId ? allServices.filter(s => s.id_vid === vidId) : allServices);
+}
+
+function renderFilteredServices(list) {
+  document.getElementById('svcPick').innerHTML = list.map(s => `
     <div class="svc-opt" id="so_${s.id_service}" onclick="selectService(${s.id_service})">
       <div class="svc-opt-name">${s.name_service}</div>
       <div class="svc-opt-meta">${s.service_types?.name_vid || ''} · ${s.duration} мин</div>
