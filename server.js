@@ -313,6 +313,24 @@ app.get('/api/clients', authMiddleware, adminOnly, async (req, res) => {
   res.json(data);
 });
 
+// PUT /api/clients/:id — редактировать клиента (admin)
+app.put('/api/clients/:id', authMiddleware, adminOnly, async (req, res) => {
+  const { fio_client, email_client, tel_client, password } = req.body;
+  const updates = { fio_client, email_client, tel_client };
+  if (password) {
+    const bcrypt = require('bcryptjs');
+    updates.password_user = await bcrypt.hash(password, 10);
+  }
+  const { data, error } = await supabase
+    .from('clients')
+    .update(updates)
+    .eq('id_client', req.params.id)
+    .select('id_client, fio_client, email_client, tel_client, role')
+    .single();
+  if (error) return res.status(400).json({ error });
+  res.json(data);
+});
+
 // POST /api/records/admin — создать запись от имени админа
 app.post('/api/records/admin', authMiddleware, adminOnly, async (req, res) => {
   const { id_client, id_service, id_master, date_service, time_service, comment } = req.body;
