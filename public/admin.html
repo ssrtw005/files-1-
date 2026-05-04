@@ -318,7 +318,29 @@
     </div><!-- /admin-layout -->
   </div>
 </section>
-
+<!-- Edit Client Modal -->
+<div class="overlay" id="editClientModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 class="modal-title">Редактировать клиента</h3>
+      <button class="modal-x" onclick="closeModal('editClientModal')">✕</button>
+    </div>
+    <input type="hidden" id="edit_cl_id">
+    <div class="form-group"><label>ФИО *</label><input type="text" id="edit_cl_fio"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Email *</label><input type="email" id="edit_cl_email"></div>
+      <div class="form-group"><label>Телефон</label><input type="tel" id="edit_cl_phone"></div>
+    </div>
+    <div class="form-group">
+      <label>Новый пароль</label>
+      <input type="password" id="edit_cl_pass" placeholder="Оставьте пустым, чтобы не менять">
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="closeModal('editClientModal')">Отмена</button>
+      <button class="btn btn-primary" onclick="saveEditClient()">Сохранить</button>
+    </div>
+  </div>
+</div>
 <!-- Add Client Modal -->
 <div class="overlay" id="addClientModal">
   <div class="modal">
@@ -724,7 +746,7 @@ async function loadClientsTable() {
   try {
     const clients = await api('/api/clients');
     document.getElementById('clientsTable').innerHTML = `<table>
-      <thead><tr><th>ID</th><th>ФИО</th><th>Email</th><th>Телефон</th><th>Роль</th></tr></thead>
+      <thead><tr><th>ID</th><th>ФИО</th><th>Email</th><th>Телефон</th><th>Роль</th><th></th></tr></thead>
       <tbody>${clients.map(c => `
         <tr>
           <td>${c.id_client}</td>
@@ -732,13 +754,43 @@ async function loadClientsTable() {
           <td>${c.email_client}</td>
           <td>${c.tel_client || '—'}</td>
           <td><span class="badge ${c.role === 'admin' ? 'badge-completed' : 'badge-confirmed'}">${c.role}</span></td>
+          <td><button class="btn btn-outline btn-sm" onclick="openEditClient(${c.id_client},'${c.fio_client}','${c.email_client}','${c.tel_client||''}')">Изменить</button></td>
         </tr>`).join('')}
       </tbody></table>`;
-    // populate client select in new record form
+
     const sel = document.getElementById('nr_client');
-    sel.innerHTML = '<option value="">— Выберите клиента —</option>' +
-      clients.filter(c => c.role === 'client').map(c =>
-        `<option value="${c.id_client}">${c.fio_client} (${c.email_client})</option>`).join('');
+    if (sel) {
+      sel.innerHTML = '<option value="">— Выберите клиента —</option>' +
+        clients.filter(c => c.role === 'client').map(c =>
+          `<option value="${c.id_client}">${c.fio_client} (${c.email_client})</option>`).join('');
+    }
+  } catch(e) { toast(e.message, 'err'); }
+}
+
+function openEditClient(id, fio, email, phone) {
+  document.getElementById('edit_cl_id').value    = id;
+  document.getElementById('edit_cl_fio').value   = fio;
+  document.getElementById('edit_cl_email').value = email;
+  document.getElementById('edit_cl_phone').value = phone;
+  document.getElementById('edit_cl_pass').value  = '';
+  openModal('editClientModal');
+}
+
+async function saveEditClient() {
+  const id    = document.getElementById('edit_cl_id').value;
+  const body  = {
+    fio_client:   document.getElementById('edit_cl_fio').value,
+    email_client: document.getElementById('edit_cl_email').value,
+    tel_client:   document.getElementById('edit_cl_phone').value,
+  };
+  const newPass = document.getElementById('edit_cl_pass').value;
+  if (newPass) body.password = newPass;
+
+  try {
+    await api(`/api/clients/${id}`, 'PUT', body);
+    toast('Данные клиента обновлены', 'ok');
+    closeModal('editClientModal');
+    loadClientsTable();
   } catch(e) { toast(e.message, 'err'); }
 }
 
