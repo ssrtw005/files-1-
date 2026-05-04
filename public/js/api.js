@@ -207,8 +207,29 @@ function injectNav() {
       <a href="booking.html"  data-page="booking.html">Запись</a>
     </div>
     <div class="nav-right" id="nav-auth"></div>
-  </nav>`;
+    <button class="burger" id="burgerBtn" onclick="toggleMenu()" aria-label="Меню">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html"    onclick="toggleMenu()">Главная</a>
+    <a href="services.html" onclick="toggleMenu()">Услуги</a>
+    <a href="masters.html"  onclick="toggleMenu()">Мастера</a>
+    <a href="booking.html"  onclick="toggleMenu()">Запись</a>
+    <div id="mobileAuthLinks" style="margin-top:1rem;display:flex;flex-direction:column;gap:.6rem"></div>
+  </div>`;
   document.body.insertAdjacentHTML('afterbegin', html);
+}
+
+function toggleMenu() {
+  const menu = document.getElementById('mobileMenu');
+  const btn  = document.getElementById('burgerBtn');
+  menu.classList.toggle('open');
+  btn.classList.toggle('open');
+  // sync auth links in mobile menu
+  const slot = document.getElementById('mobileAuthLinks');
+  const navAuth = document.getElementById('nav-auth');
+  if (slot && navAuth) slot.innerHTML = navAuth.innerHTML;
 }
 
 /* ── Shared Footer HTML ── */
