@@ -223,6 +223,17 @@ app.post('/api/records', authMiddleware, async (req, res) => {
     res.json(data);
 });
 
+// PATCH /api/records/:id/time — изменить время (admin)
+app.patch('/api/records/:id/time', authMiddleware, adminOnly, async (req, res) => {
+  const { data, error } = await supabase
+    .from('records')
+    .update({ time_service: req.body.time_service })
+    .eq('id_record', req.params.id)
+    .select().single();
+  if (error) return res.status(400).json({ error });
+  res.json(data);
+});
+
 // PATCH /api/records/:id/status — изменить статус (admin/master)
 app.patch('/api/records/:id/status', authMiddleware, async (req, res) => {
     if (req.user.role === 'client') return res.status(403).json({ error: 'Нет доступа' });
