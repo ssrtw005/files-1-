@@ -442,7 +442,13 @@ function recordsTableHtml(records, withActions = false) {
     <tr>
       <td>#${r.id_record}</td>
       <td>${fmtDate(r.date_service)}</td>
-      <td>${fmtTime(r.time_service)}</td>
+      <td>
+        ${withActions
+          ? `<input type="time" value="${r.time_service || '00:00'}" step="1800"
+               style="width:90px;padding:.2rem .4rem;border-radius:6px;border:1px solid var(--sand);font-size:.82rem"
+               onchange="updateTime(${r.id_record}, this.value)">`
+          : fmtTime(r.time_service) || '—'}
+      </td>
       <td>${r.fio_client}</td>
       <td>${r.name_service}</td>
       <td>${r.fio_master}</td>
@@ -464,6 +470,13 @@ function recordsTableHtml(records, withActions = false) {
     </tr></thead>
     <tbody>${rows}</tbody>
   </table>`;
+}
+
+async function updateTime(id, time) {
+  try {
+    await api(`/api/records/${id}/time`, 'PATCH', { time_service: time });
+    toast('Время обновлено ✓', 'ok');
+  } catch(e) { toast(e.message, 'err'); }
 }
 
 async function changeStatus(id, status, sel) {
