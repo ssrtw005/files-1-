@@ -160,11 +160,16 @@
 
         <!-- DASHBOARD -->
         <div class="adm-panel active" id="pDash">
-          <div class="panel-head" style="display:flex;justify-content:space-between;align-items:start;flex-wrap:wrap;gap:1rem">
-  <div><h3>Дашборд</h3><p>Общая сводка по салону</p></div>
-  <div style="display:flex;gap:.5rem">
-    <button class="tab-btn active" id="dash-month" onclick="switchDashPeriod('month',this)">За месяц</button>
-    <button class="tab-btn" id="dash-year" onclick="switchDashPeriod('year',this)">За год</button>
+          <div class="panel-head">
+  <h3>Дашборд</h3>
+  <p>Общая сводка по салону</p>
+  <div style="display:flex;align-items:center;gap:.8rem;margin-top:1.2rem;flex-wrap:wrap">
+    <select id="dashMonth" onchange="loadDash()" style="padding:.5rem .9rem;border-radius:10px;border:1.5px solid var(--sand);background:var(--ivory);font-family:inherit;font-size:.85rem;color:var(--plum);cursor:pointer"></select>
+    <select id="dashYear" onchange="loadDash()" style="padding:.5rem .9rem;border-radius:10px;border:1.5px solid var(--sand);background:var(--ivory);font-family:inherit;font-size:.85rem;color:var(--plum);cursor:pointer"></select>
+    <div style="display:flex;gap:.4rem">
+      <button class="btn btn-outline btn-sm" onclick="setDashPeriod('month')">Текущий месяц</button>
+      <button class="btn btn-outline btn-sm" onclick="setDashPeriod('year')">Весь год</button>
+    </div>
   </div>
 </div>
 <div class="dash-grid" id="dashGrid">
@@ -433,6 +438,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   document.getElementById('adminLayout').style.display = 'grid';
   document.getElementById('admName').textContent = u.fio_client || 'Администратор';
+  initDashSelects();
   loadDash();
   loadServiceTypes();
   loadSpecializations();
@@ -440,44 +446,57 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 /* ── Dashboard ── */
-async function loadDash(period = 'month') {
+function initDashSelects() {
+  const months = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+  const now = new Date();
+  const mSel = document.getElementById('dashMonth');
+  const ySel = document.getElementById('dashYear');
+
+  mSel.innerHTML = months.map((m, i) =>
+    `<option value="${i}" ${i === now.getMonth() ? 'selected' : ''}>${m}</option>`).join('');
+
+  // Годы: текущий и 2 предыдущих
+  for (let y = now.getFullYear(); y >= now.getFullYear() - 2; y--) {
+    ySel.innerHTML += `<option value="${y}" ${y === now.getFullYear() ? 'selected' : ''}>${y}</option>`;
+  }
+}
+
+function setDashPeriod(mode) {
+  const now = new Date();
+  document.getElementById('dashMonth').value = now.getMonth();
+  document.getElementById('dashYear').value  = now.getFullYear();
+  if (mode === 'year') document.getElementById('dashMonth').value = -1; // -1 = весь год
+  loadDash();
+}
+
+async function loadDash() {
   try {
     const records = await api('/api/records');
+    const month = +document.getElementById('dashMonth').value;
+    const year  = +document.getElementById('dashYear').value;
 
-    // Фильтр по периоду
-    const now = new Date();
     const filtered = records.filter(r => {
       const d = new Date(r.date_service);
-      if (period === 'month') {
-        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-      } else {
-        return d.getFullYear() === now.getFullYear();
-      }
+      if (month === -1) return d.getFullYear() === year;
+      return d.getMonth() === month && d.getFullYear() === year;
     });
+
+    const months = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+    const periodLabel = month === -1 ? `${year} год` : `${months[month]} ${year}`;
 
     const pending   = filtered.filter(r => r.status === 'pending').length;
     const completed = filtered.filter(r => r.status === 'completed').length;
     const revenue   = filtered.filter(r => r.status === 'completed').reduce((s,r) => s + Number(r.price_service||0), 0);
-    const periodLabel = period === 'month'
-      ? now.toLocaleString('ru-RU', { month: 'long', year: 'numeric' })
-      : now.getFullYear() + ' год';
 
     document.getElementById('dashGrid').innerHTML = `
-      <div class="dash-card"><div class="dc-icon">📋</div><div class="dc-num">${filtered.length}</div><div class="dc-lbl">Записей за период</div></div>
+      <div class="dash-card"><div class="dc-icon">📋</div><div class="dc-num">${filtered.length}</div><div class="dc-lbl">Записей · ${periodLabel}</div></div>
       <div class="dash-card"><div class="dc-icon">⏳</div><div class="dc-num">${pending}</div><div class="dc-lbl">Ожидают подтверждения</div></div>
       <div class="dash-card"><div class="dc-icon">✅</div><div class="dc-num">${completed}</div><div class="dc-lbl">Выполнено</div></div>
-      <div class="dash-card"><div class="dc-icon">💰</div><div class="dc-num" style="font-size:1.4rem">${fmtPrice(revenue)}</div><div class="dc-lbl">Выручка за период</div></div>`;
+      <div class="dash-card"><div class="dc-icon">💰</div><div class="dc-num" style="font-size:1.4rem">${fmtPrice(revenue)}</div><div class="dc-lbl">Выручка · ${periodLabel}</div></div>`;
 
-    // Последние записи — сортировка по id_record
     const sorted = [...records].sort((a, b) => b.id_record - a.id_record);
     document.getElementById('dashLastRecords').innerHTML = recordsTableHtml(sorted.slice(0, 8));
   } catch(e) { toast('Ошибка загрузки дашборда', 'err'); }
-}
-
-function switchDashPeriod(period, btn) {
-  document.querySelectorAll('#pDash .tab-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  loadDash(period);
 }
 
 /* ── All records ── */
