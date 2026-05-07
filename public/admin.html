@@ -452,10 +452,12 @@ function initDashSelects() {
   const mSel = document.getElementById('dashMonth');
   const ySel = document.getElementById('dashYear');
 
-  mSel.innerHTML = months.map((m, i) =>
-    `<option value="${i}" ${i === now.getMonth() ? 'selected' : ''}>${m}</option>`).join('');
+  // Добавляем "Весь год" первым пунктом
+  mSel.innerHTML = `<option value="all">— Весь год —</option>` +
+    months.map((m, i) =>
+      `<option value="${i}" ${i === now.getMonth() ? 'selected' : ''}>${m}</option>`).join('');
 
-  // Годы: текущий и 2 предыдущих
+  ySel.innerHTML = '';
   for (let y = now.getFullYear(); y >= now.getFullYear() - 2; y--) {
     ySel.innerHTML += `<option value="${y}" ${y === now.getFullYear() ? 'selected' : ''}>${y}</option>`;
   }
@@ -463,16 +465,20 @@ function initDashSelects() {
 
 function setDashPeriod(mode) {
   const now = new Date();
-  document.getElementById('dashMonth').value = now.getMonth();
-  document.getElementById('dashYear').value  = now.getFullYear();
-  if (mode === 'year') document.getElementById('dashMonth').value = -1; // -1 = весь год
+  document.getElementById('dashYear').value = now.getFullYear();
+  if (mode === 'month') {
+    document.getElementById('dashMonth').value = now.getMonth();
+  } else {
+    document.getElementById('dashMonth').value = 'all';
+  }
   loadDash();
 }
 
 async function loadDash() {
   try {
     const records = await api('/api/records');
-    const month = +document.getElementById('dashMonth').value;
+   const monthVal = document.getElementById('dashMonth').value;
+const month = monthVal === 'all' ? -1 : +monthVal;
     const year  = +document.getElementById('dashYear').value;
 
     const filtered = records.filter(r => {
