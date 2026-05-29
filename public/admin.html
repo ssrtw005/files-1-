@@ -138,10 +138,10 @@
           <button class="adm-item" onclick="showPanel('pAllRecords',this)"><span class="adm-icon">📋</span>Все записи</button>
           <div class="adm-sep"></div>
           <div style="padding:.4rem 1.4rem;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ivory2);opacity:.4">Отчёты</div>
-          <button class="adm-item" onclick="showPanel('pRptMaster',this)"><span class="adm-icon">👩‍🎨</span>По мастеру (В-02)</button>
-          <button class="adm-item" onclick="showPanel('pRptClient',this)"><span class="adm-icon">👤</span>По клиенту (В-03)</button>
-          <button class="adm-item" onclick="showPanel('pRptService',this)"><span class="adm-icon">💅</span>По услуге (В-04)</button>
-          <button class="adm-item" onclick="showPanel('pJournal',this)"><span class="adm-icon">📒</span>Журнал мастера (В-06)</button>
+          <button class="adm-item" onclick="showPanel('pRptMaster',this)"><span class="adm-icon">👩‍🎨</span>По мастеру</button>
+          <button class="adm-item" onclick="showPanel('pRptClient',this)"><span class="adm-icon">👤</span>По клиенту</button>
+          <button class="adm-item" onclick="showPanel('pRptService',this)"><span class="adm-icon">💅</span>По услуге</button>
+          <button class="adm-item" onclick="showPanel('pJournal',this)"><span class="adm-icon">📒</span>Журнал мастера</button>
           <div class="adm-sep"></div>
           <button class="adm-item" onclick="showPanel('pServices',this)"><span class="adm-icon">✂️</span>Услуги</button>
           
@@ -191,7 +191,7 @@
 
         <!-- В-02: Отчёт по мастеру -->
         <div class="adm-panel" id="pRptMaster">
-          <div class="panel-head"><h3>В-02 · Отчёт по мастеру</h3><p>Выполненные работы за выбранный период</p></div>
+          <div class="panel-head"><h3>Отчёт по мастеру</h3><p>Выполненные работы за выбранный период</p></div>
           <div class="rpt-form">
             <div class="form-row">
               <div class="form-group"><label>ФИО мастера</label><input type="text" id="r2fio" placeholder="Введите ФИО..."></div>
@@ -208,7 +208,7 @@
 
         <!-- В-03: Отчёт по клиенту -->
         <div class="adm-panel" id="pRptClient">
-          <div class="panel-head"><h3>В-03 · Услуги клиента</h3><p>Список услуг, оказанных клиенту за период</p></div>
+          <div class="panel-head"><h3>Услуги клиента</h3><p>Список услуг, оказанных клиенту за период</p></div>
           <div class="rpt-form">
             <div class="form-group"><label>ФИО клиента</label><input type="text" id="r3fio" placeholder="Введите ФИО..."></div>
             <div class="form-row">
@@ -222,7 +222,7 @@
 
         <!-- В-04: Отчёт по услуге -->
         <div class="adm-panel" id="pRptService">
-          <div class="panel-head"><h3>В-04 · Отчёт по услуге</h3><p>Записи по конкретной услуге за период</p></div>
+          <div class="panel-head"><h3>Отчёт по услуге</h3><p>Записи по конкретной услуге за период</p></div>
           <div class="rpt-form">
             <div class="form-group"><label>Наименование услуги</label><input type="text" id="r4name" placeholder="Стрижка..."></div>
             <div class="form-row">
@@ -236,7 +236,7 @@
 
         <!-- В-06: Журнал мастера -->
         <div class="adm-panel" id="pJournal">
-          <div class="panel-head"><h3>В-06 · Журнал мастера</h3><p>Расписание мастера на выбранную дату</p></div>
+          <div class="panel-head"><h3>Журнал мастера</h3><p>Расписание мастера на выбранную дату</p></div>
           <div class="rpt-form">
             <div class="form-row">
               <div class="form-group"><label>ФИО мастера</label><input type="text" id="j6fio" placeholder="Введите ФИО..."></div>
