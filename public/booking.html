@@ -355,8 +355,12 @@ function preselectService(id) { selectService(id); }
 function preselectMaster(id)  { if (allMasters.length) selectMaster(id); }
 
 function goStep(n) {
-  if (n === 2 && !sel.service) { toast('Выберите услугу', 'err'); return; }
-  if (n === 3 && !sel.master)  { toast('Выберите мастера', 'err'); return; }
+  if (n === 2 && !sel.service) {
+    toast('Услуга не выбрана! Выберите услугу', 'err'); return;
+  }
+  if (n === 3 && !sel.master) {
+    toast('Мастер не выбран! Выберите мастера', 'err'); return;
+  }
   curStep = n;
   for (let i = 1; i <= 4; i++) {
     document.getElementById(`sp${i}`)?.classList.toggle('active', i === n);
@@ -385,8 +389,8 @@ function updateSummary() {
 async function submitBooking() {
   const date    = document.getElementById('bkDate').value;
   const comment = document.getElementById('bkComment').value;
-  if (!sel.service || !sel.master || !date) {
-    toast('Заполните все поля', 'err'); return;
+  if (!date) {
+    toast('Дата не выбрана! Выберите дату', 'err'); return;
   }
   try {
     await api('/api/records', 'POST', {
